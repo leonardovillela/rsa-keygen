@@ -5,10 +5,9 @@ public class BitSizePrimeProvider {
     private static final String BIT_SIZE_PROPERTY_NAME = "key.bit.size";
     private static final int DEFAULT_BITS_SIZE = 64;
 
-    // TODO(LV) Criar constante para o dois
     public static int getBitsSize() {
         if (bitSizeIsDefined())
-            return Integer.parseInt(System.getProperty(BIT_SIZE_PROPERTY_NAME)) / 2;
+            return Integer.parseInt(System.getProperty(BIT_SIZE_PROPERTY_NAME));
 
         return DEFAULT_BITS_SIZE;
     }

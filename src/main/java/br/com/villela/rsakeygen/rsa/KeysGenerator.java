@@ -1,7 +1,7 @@
 package br.com.villela.rsakeygen.rsa;
 
 import br.com.villela.rsakeygen.prime.PrimeGenerator;
-import br.com.villela.rsacoreapi.KeyPair;
+import br.com.villela.rsacore.key.KeyPair;
 
 import java.math.BigInteger;
 import java.util.stream.Stream;

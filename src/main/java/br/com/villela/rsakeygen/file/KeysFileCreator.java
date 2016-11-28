@@ -1,71 +1,53 @@
 package br.com.villela.rsakeygen.file;
 
+import br.com.villela.rsacore.config.KeysConfig;
+import br.com.villela.rsacore.key.Key;
+import br.com.villela.rsacore.key.KeyPair;
 import br.com.villela.rsakeygen.prime.BitSizePrimeProvider;
-import br.com.villela.rsacoreapi.KeyPair;
-import br.com.villela.rsacoreapi.PrivateKey;
-import br.com.villela.rsacoreapi.PublicKey;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
+
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 public class KeysFileCreator {
 
-    private static final String dirKeysName = ".simple-rsa";
-    private static final String publicKeyFileName = "id_rsa.pub";
-    private static final String privateKeyFileName = "id_rsa";
+    public static void createKeysFiles(KeyPair keyPair, KeysConfig keysConfig) {
+        Path keyDirPath = keysConfig.getKeyDirPath();
+        if (!Files.exists(keyDirPath))
+            createDirKeyLocation(keyDirPath);
 
-    // TODO(LV) resolver esse "* 2"
-    public static void createKeysFiles(KeyPair keyPair) {
-        if (!dirKeyLocationIsCreated())
-            createDirKeyLocation();
+        createPublicKeyFile(keyPair.getPublicKey(), keysConfig.getPublicKeyFilePath());
+        createPrivateKeyFile(keyPair.getPrivateKey(), keysConfig.getPrivateKeyFilePath());
 
-        createPublicKeyFile(keyPair.getPublicKey());
-        createPrivateKeyFile(keyPair.getPrivateKey());
-
-        System.out.println("Keys generated Success, with " + BitSizePrimeProvider.getBitsSize() * 2 + " bits!");
+        System.out.println("Chaves geradas com sucesso, tamanho " + BitSizePrimeProvider.getBitsSize() + " bits!");
     }
 
-    private static void createPublicKeyFile(PublicKey publicKey) {
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(getPublicKeyFilePath()))) {
-            outputStream.writeUTF(publicKey.toString());
+    private static void createPublicKeyFile(Key publicKey, Path publicKeyFilePath) {
+        try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(publicKeyFilePath, CREATE, WRITE))) {
+            byte[] serializedPublicKey = publicKey.toString().getBytes();
+            out.write(serializedPublicKey, 0, serializedPublicKey.length);
         } catch (IOException e) {
             System.err.printf("Não foi possivel criar o arquivo da chave publica.");
         }
     }
 
-    private static void createPrivateKeyFile(PrivateKey privateKey) {
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(getPrivateKeyFilePath()))) {
-            outputStream.writeUTF(privateKey.toString());
+    private static void createPrivateKeyFile(Key privateKey, Path privateKeyFilePath) {
+        try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(privateKeyFilePath, CREATE, WRITE))) {
+            byte[] serializedPublicKey = privateKey.toString().getBytes();
+            out.write(serializedPublicKey, 0, serializedPublicKey.length);
         } catch (IOException e) {
             System.err.printf("Não foi possivel criar o arquivo da chave privada.");
         }
     }
 
-    private static void createDirKeyLocation() {
+    private static void createDirKeyLocation(Path keyDirPath) {
         try {
-            Files.createDirectories(Paths.get(getDirKeyLocation()));
+            Files.createDirectories(keyDirPath);
         } catch (IOException e) {
             System.err.printf("Não foi possivel criar a pasta para as chaves da aplicão.");
         }
-    }
-
-    private static boolean dirKeyLocationIsCreated() {
-        return Files.exists(Paths.get(getDirKeyLocation()));
-    }
-
-    private static String getDirKeyLocation() {
-        String homeFolderPath = System.getenv().get("HOME");
-        return homeFolderPath + "/" + dirKeysName + "/";
-    }
-
-    private static String getPublicKeyFilePath() {
-        return getDirKeyLocation() + publicKeyFileName;
-    }
-
-    private static String getPrivateKeyFilePath() {
-        return getDirKeyLocation() + privateKeyFileName;
     }
 }
